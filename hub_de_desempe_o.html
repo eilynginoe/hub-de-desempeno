@@ -1,0 +1,2359 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet">
+    <title>Signal IQ - Hub de Desempeño</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+
+            background:
+                radial-gradient(circle at top left,
+                    rgba(14, 165, 233, .15),
+                    transparent 30%),
+
+                radial-gradient(circle at bottom right,
+                    rgba(56, 189, 248, .08),
+                    transparent 40%),
+
+                #020617;
+
+            color: #f8fafc;
+
+            font-family: 'Inter', sans-serif;
+
+            overflow: hidden;
+        }
+
+        .main-console {
+
+            padding: 60px;
+
+            border-radius: 28px;
+
+            background:
+                rgba(255, 255, 255, .03);
+
+            backdrop-filter: blur(30px);
+
+            border:
+                1px solid rgba(255, 255, 255, .08);
+
+            box-shadow:
+                0 0 40px rgba(14, 165, 233, .08);
+
+            animation: fadeIn 1.2s ease;
+        }
+
+        .signal-title {
+
+            font-family:
+                'Orbitron',
+                sans-serif;
+
+            text-shadow:
+                0 0 12px rgba(56, 189, 248, .18);
+
+        }
+
+        .panel {
+
+            position: relative;
+
+            padding: 24px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(255, 255, 255, .02);
+
+            backdrop-filter: blur(20px);
+
+            border:
+                1px solid rgba(255, 255, 255, .06);
+
+            transition:
+                transform .2s ease,
+                border .3s ease,
+                box-shadow .3s ease;
+
+            width: 180px;
+
+            min-width: 180px;
+        }
+
+        .panel:hover {
+
+            border-color:
+                rgba(56, 189, 248, .4);
+
+            box-shadow:
+                0 0 25px rgba(56, 189, 248, .12);
+        }
+
+        .fader-track {
+
+            width: 6px;
+            height: 160px;
+
+            position: relative;
+
+            border-radius: 999px;
+
+            cursor: pointer;
+
+            background:
+                linear-gradient(to bottom,
+                    #0f172a,
+                    #334155);
+        }
+
+        .fader-track::before {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            background:
+                rgba(56, 189, 248, .15);
+
+            filter: blur(8px);
+        }
+
+        .fader-thumb {
+
+            width: 44px;
+            height: 18px;
+
+            position: absolute;
+
+            left: -19px;
+            top: 120px;
+
+            border-radius: 999px;
+
+            background: #0ea5e9;
+
+            box-shadow:
+                0 0 12px #38bdf8,
+                0 0 32px #38bdf8;
+
+            transition:
+                top .12s ease-out,
+                transform .2s ease;
+
+            cursor: grab;
+        }
+
+        .fader-thumb:active {
+
+            cursor: grabbing;
+
+            transform: scale(1.15);
+
+            box-shadow:
+                0 0 20px #38bdf8,
+                0 0 50px #38bdf8;
+        }
+
+        .fader-thumb:hover {
+
+            transform: scale(1.08);
+        }
+
+        .current-state {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 48px;
+
+            margin-bottom: 40px;
+
+            text-align: center;
+        }
+
+        .state-block {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+
+            max-width: 180px;
+        }
+
+        .state-label {
+
+            font-size: 10px;
+
+            letter-spacing: .12em;
+
+            text-transform: uppercase;
+
+            color:
+                rgba(255, 255, 255, .45);
+        }
+
+        .state-value {
+
+            font-size: 18px;
+
+            font-weight: 700;
+
+            color: #38bdf8;
+
+            letter-spacing: .08em;
+
+            text-shadow:
+                0 0 15px #38bdf8,
+                0 0 35px #38bdf8;
+        }
+
+        .label-title {
+
+            font-size: 11px;
+
+            letter-spacing: .2em;
+
+            color: #7dd3fc;
+
+            font-weight: bold;
+        }
+
+        .signal-list {
+
+            display: flex;
+
+            height: 95px;
+
+            justify-content: center;
+
+            overflow: hidden;
+
+            flex-direction: column;
+
+            gap: 8px;
+
+            margin-top: 10px;
+
+            font-size: 10px;
+
+            color:
+                rgba(255, 255, 255, .35);
+            width: 100%;
+        }
+
+        .signal-item {
+            font-size: 11px;
+
+            opacity: .22;
+            transition:
+                all .25s ease;
+
+            opacity: .35;
+        }
+
+        .active-signal {
+
+            color: #38bdf8;
+
+            opacity: 1;
+
+            font-weight: 700;
+
+            font-size: 15px;
+
+            letter-spacing: .08em;
+
+            transform: scale(1.12);
+
+            text-shadow:
+                0 0 12px #38bdf8,
+                0 0 30px #38bdf8;
+
+            transition: all .25s ease;
+        }
+
+
+        .modal {
+
+            background:
+                rgba(2, 6, 23, .85);
+
+            backdrop-filter: blur(12px);
+        }
+
+        .frequency-summary {
+
+            max-width: 760px;
+
+            margin:
+                42px auto 0;
+
+            text-align: center;
+
+            line-height: 1.9;
+
+            font-size: 15px;
+
+            color:
+                rgba(255, 255, 255, .72);
+
+            animation:
+                fadeIn 0.4s ease;
+        }
+
+        .system-note {
+
+            margin-top: 28px;
+
+            font-size: 11px;
+
+            letter-spacing: .08em;
+
+            color:
+                rgba(255, 255, 255, .32);
+
+            text-align: center;
+        }
+
+        .framework-label {
+
+            font-size: 10px;
+
+            letter-spacing: .24em;
+
+            text-transform: uppercase;
+
+            color:
+                rgba(255, 255, 255, .32);
+
+            margin-bottom: 10px;
+        }
+
+        .framework-value {
+
+            font-size: 14px;
+
+            line-height: 1.7;
+
+            color:
+                rgba(255, 255, 255, .92);
+
+            font-weight: 500;
+
+            text-shadow:
+                0 0 14px rgba(56, 189, 248, .15);
+        }
+
+        .framework-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+
+            padding-left: 0;
+
+            margin: 0;
+
+            list-style: none;
+        }
+
+        .framework-list li {
+
+            position: relative;
+
+            padding-left: 18px;
+
+            font-size: 13px;
+
+            line-height: 1.7;
+
+            color:
+                rgba(255, 255, 255, .88);
+        }
+
+        .framework-list li::before {
+
+            content: "—";
+
+            position: absolute;
+
+            left: 0;
+
+            color:
+                rgba(56, 189, 248, .8);
+        }
+
+
+        .frequency-summary strong {
+
+            color: #38bdf8;
+
+            font-weight: 700;
+
+            text-shadow:
+                0 0 12px #38bdf8;
+        }
+
+        .analyze-btn {
+
+            padding:
+                14px 34px;
+
+            border-radius: 999px;
+
+            background:
+                linear-gradient(90deg,
+                    #38bdf8,
+                    #0ea5e9);
+
+            color: black;
+
+            font-size: 11px;
+
+            letter-spacing: .22em;
+
+            font-weight: 700;
+
+            transition:
+                all .3s ease;
+
+            box-shadow:
+                0 0 30px rgba(56, 189, 248, .35);
+        }
+
+        .analyze-btn:hover {
+
+            transform:
+                translateY(-2px) scale(1.03);
+
+            box-shadow:
+                0 0 45px rgba(56, 189, 248, .5);
+
+        }
+
+        .section-label {
+
+            font-size: 11px;
+
+            letter-spacing: .18em;
+
+            color: #8f775f;
+
+            margin-bottom: 18px;
+
+            font-weight: 700;
+        }
+
+        .main-copy {
+
+            font-size: 22px;
+
+            line-height: 1.9;
+
+            color: #111827;
+
+            max-width: 90%;
+        }
+
+        .response-box {
+
+            background: #16263d;
+
+            border-radius: 20px;
+
+            padding: 28px;
+        }
+
+        .response-label {
+
+            font-size: 11px;
+
+            letter-spacing: .18em;
+
+            color: #6cb6ff;
+
+            margin-bottom: 20px;
+
+            font-weight: 700;
+        }
+
+        .response-copy {
+
+            font-size: 34px;
+
+            line-height: 1.7;
+
+            color: white;
+
+            font-style: italic;
+        }
+
+        .why-copy {
+
+            font-size: 19px;
+
+            line-height: 1.8;
+
+            color: #5b4635;
+
+            max-width: 90%;
+        }
+
+        .side-section {
+
+            padding-bottom: 34px;
+
+            margin-bottom: 34px;
+
+            border-bottom:
+                1px solid rgba(255, 255, 255, .08);
+        }
+
+        .side-label {
+
+            font-size: 10px;
+
+            letter-spacing: .18em;
+
+            color: rgba(255, 255, 255, .38);
+
+            margin-bottom: 14px;
+        }
+
+        .side-value {
+
+            font-size: 24px;
+
+            line-height: 1.5;
+
+            color: white;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 100%;
+
+            opacity: 0;
+            pointer-events: none;
+
+            transition:
+                opacity .35s ease;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 2;
+        }
+
+        @keyframes fadeIn {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    scale(.96);
+
+                filter:
+                    blur(12px);
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    scale(1);
+
+                filter:
+                    blur(0);
+            }
+        }
+
+        .dial:hover {
+            border-color: #38bdf8;
+            background: #334155;
+        }
+
+        #connection-path {
+
+            filter:
+                drop-shadow(0 0 8px rgba(125, 220, 255, .35));
+
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-[#020617] overflow-x-hidden">
+
+    <div class="w-full flex flex-col items-center px-8 py-8">
+
+
+
+        <div id="app-container" class="
+relative
+w-full
+mt-10
+min-h-[1400px]
+flex
+justify-center
+items-center
+">
+            <div id="screen1" class="screen active w-full max-w-4xl text-center">
+
+                <!-- SIGNAL IQ BRAND -->
+
+                <div class="w-full max-w-[1700px] flex items-center gap-6 mb-12">
+
+                    <!-- ICONO -->
+
+                    <img src="frecuencia-icon.png" alt="Signal IQ" class="w-20 h-20 object-contain">
+
+                    <!-- DIVISOR -->
+
+                    <div class="w-px h-24 bg-sky-400/70"></div>
+
+                    <!-- TEXTOS -->
+
+                    <div class="flex flex-col">
+
+                        <!-- TITULO -->
+
+                        <h1 class="leading-none">
+
+                            <span class="
+                text-[72px]
+                font-black
+                tracking-[0.08em]
+                text-white
+                signal-title">
+
+                                SIGNAL
+
+                            </span>
+
+                            <span class="
+                text-[62px]
+                font-black
+                tracking-[0.08em]
+                text-sky-400
+                signal-title">
+
+                                IQ
+
+                            </span>
+
+                        </h1>
+
+                        <!-- SUBTITLE -->
+
+                        <div class="
+            mt-2
+            text-[24px]
+            tracking-[0.18em]
+            uppercase
+            text-white/70
+            font-semibold">
+
+                            Hub de Desempeño Conversacional
+
+                        </div>
+
+                        <!-- DESCRIPTION -->
+
+                        <div class="
+            mt-1
+            text-[22px]
+            text-white/45
+            font-light">
+
+                            Calibración táctica de conversaciones estratégicas
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <h1 class="text-xs tracking-widest text-sky-400 font-bold mb-10 uppercase italic">Calibración de
+                    Frecuencias:
+                    Sintoniza el Riesgo</h1>
+
+
+                <div class="relative w-full flex justify-center gap-16">
+
+                    <svg id="connection-svg" class="absolute inset-0 w-full h-full pointer-events-none z-50"
+                        preserveAspectRatio="none">
+
+                        <path id="connection-path" stroke="#7ddcff" stroke-width="0.5" fill="none" opacity=".9"
+                            stroke-linecap="round" stroke-linejoin="round" />
+
+                    </svg>
+
+                    <!-- COLUMNA 1 -->
+                    <div class="panel flex flex-col items-center gap-4">
+
+                        <span class="label-title">
+                            1. AUDIENCIA
+                        </span>
+
+                        <div class="fader-track" data-index="0">
+                            <div id="thumb0" class="fader-thumb"></div>
+                        </div>
+
+                        <div id="audience-list" class="signal-list"></div>
+                    </div>
+
+                    <!-- COLUMNA 2 -->
+                    <div class="panel flex flex-col items-center gap-4">
+
+                        <span class="label-title">
+                            2. SEÑAL
+                        </span>
+
+                        <div class="fader-track" data-index="1">
+                            <div id="thumb1" class="fader-thumb"></div>
+                        </div>
+
+                        <div id="signal-list" class="signal-list"></div>
+                    </div>
+
+                    <!-- COLUMNA 3 -->
+                    <div class="panel flex flex-col items-center gap-4">
+
+                        <span class="label-title">
+                            3. BLOQUEO
+                        </span>
+
+                        <div class="fader-track" data-index="2">
+                            <div id="thumb2" class="fader-thumb"></div>
+                        </div>
+
+                        <div id="block-list" class="signal-list"></div>
+
+                    </div>
+
+                </div>
+
+                <p class="system-note">
+
+                    El sistema puede expandirse según el nivel
+                    de calibración requerido.
+
+                </p>
+
+                <div class="frequency-summary">
+
+                    <p id="summary-text">
+
+                        Parece que estás calibrando una conversación
+                        con un perfil C-Level.
+
+                        La señal más fuerte en este momento parece ser
+                        escepticismo, y el principal bloqueo identificado
+                        viene del presupuesto.
+
+                    </p>
+
+                </div>
+
+                <div class="mt-10">
+
+                    <button id="analyze-btn" onclick="startAnalysis()" class="analyze-btn hidden">
+
+                        SINTONIZAR FRECUENCIAS
+
+                    </button>
+
+                </div>
+
+
+            </div>
+
+            <div id="screen3" class="screen w-full max-w-7xl rounded-[32px] border border-[#d9d2c7]">
+
+                <div class="grid grid-cols-[1.7fr_.8fr] items-stretch">
+
+                    <!-- COLUMNA IZQUIERDA -->
+                    <div class="bg-[#f5f0e8] px-12 py-7 rounded-l-[32px]">
+
+                        <!-- SEÑAL -->
+                        <div class="mb-8">
+
+                            <div class="section-label">
+                                SEÑAL DETECTADA
+                            </div>
+
+                            <p id="detected-text" class="main-copy">
+                            </p>
+
+                        </div>
+
+                        <!-- INTENCIÓN -->
+                        <div class="mb-8 pt-7 border-t border-[#d9d2c7]">
+
+                            <div class="section-label">
+                                INTENCIÓN ESTRATÉGICA
+                            </div>
+
+                            <p id="intention-text" class="main-copy">
+                            </p>
+
+                        </div>
+
+                        <!-- RESPUESTA -->
+                        <div class="mb-8 pt-7 border-t border-[#d9d2c7]">
+
+                            <div class="response-box">
+
+                                <div class="response-label">
+                                    RESPUESTA SUGERIDA
+                                </div>
+
+                                <p id="response-text" class="response-copy">
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <!-- POR QUÉ FUNCIONA -->
+                        <div class="pt-7 border-t border-[#d9d2c7]">
+
+                            <div class="section-label">
+                                POR QUÉ FUNCIONA
+                            </div>
+
+                            <p id="why-text" class="why-copy mb-5">
+                            </p>
+
+                            <button onclick="showValidation()"
+                                class="w-full py-5 bg-[#142338] text-white rounded-2xl hover:opacity-90 transition text-sm tracking-[0.08em] uppercase">
+
+                                Consolidar aprendizaje
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+
+
+
+                    <!-- COLUMNA DERECHA -->
+                    <div class="bg-[#142338] text-white px-10 py-7 rounded-r-[32px]">
+
+                        <div class="side-section">
+
+                            <div class="side-label">
+                                MOVIMIENTO
+                            </div>
+
+                            <div id="fw-movement" class="side-value">
+                            </div>
+
+                        </div>
+
+                        <div class="side-section">
+
+                            <div class="side-label">
+                                AUDIENCIA
+                            </div>
+
+                            <div id="fw-audience" class="side-value">
+                            </div>
+
+                        </div>
+
+                        <div class="side-section">
+
+                            <div class="side-label">
+                                SEÑAL
+                            </div>
+
+                            <div id="fw-signal" class="side-value">
+                            </div>
+
+                        </div>
+
+                        <div class="side-section">
+
+                            <div class="side-label">
+                                BLOQUEO
+                            </div>
+
+                            <div id="fw-block" class="side-value">
+                            </div>
+
+                        </div>
+
+                        <div class="side-section">
+
+                            <div class="side-label">
+                                LO QUE OBSERVAS EN EL CLIENTE
+                            </div>
+
+                            <ul id="fw-signal-list" class="framework-list">
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- Modal de Consolidación -->
+        <div id="validationModal"
+            class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-6 transition-opacity duration-200">
+
+            <div class="bg-[#142338]
+                w-full
+                max-w-xl
+                rounded-[32px]
+                border border-white/10
+                shadow-2xl
+                px-10
+                py-9">
+
+                <!-- HEADER -->
+
+                <div class="mb-5">
+
+                    <div class="text-[11px]
+            tracking-[0.25em]
+            uppercase
+            text-sky-400
+            mb-4">
+
+                        Consolidación táctica
+
+                    </div>
+
+                    <h3 class="text-xl
+            leading-normal
+            text-white
+            max-w-xl">
+
+                        Antes de cerrar el análisis,
+                        registra lo más importante
+                        que detectaste en esta conversación.
+
+                    </h3>
+
+                </div>
+
+                <!-- PREGUNTA 1 -->
+
+                <div class="mb-8">
+
+                    <label class="block
+            text-sky-300
+            text-sm
+            mb-4">
+
+                        ¿Qué estaba necesitando realmente el perfil para avanzar?
+
+                    </label>
+
+                    <textarea id="reflectionInput" rows="4"
+                        placeholder="Ej: Más seguridad antes de comprometer recursos."
+                        class="w-full p-5 bg-slate-900 border border-slate-600 rounded-2xl text-white resize-none leading-relaxed focus:outline-none focus:border-sky-400"></textarea>
+
+                </div>
+
+                <!-- PREGUNTA 2 -->
+
+                <div class="mb-5">
+
+                    <label class="block
+            text-sky-300
+            text-sm
+            mb-4">
+
+                        ¿Qué cambiarías ahora en una conversación real?
+
+                    </label>
+
+                    <textarea id="transferInput" rows="4"
+                        placeholder="Ej: Validaría impacto antes de hablar de inversión."
+                        class="w-full p-5 bg-slate-900 border border-slate-600 rounded-2xl text-white resize-none leading-relaxed focus:outline-none focus:border-sky-400"></textarea>
+
+                </div>
+
+                <!-- AUTOEVALUACIÓN -->
+
+                <div class="mb-5">
+
+                    <div class="text-sky-300
+            text-sm
+            mb-5">
+
+                        ¿Qué tan claro fue para ti identificar la tensión de la conversación?
+
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+
+                        <label class="flex items-center gap-3 text-gray-300">
+
+                            <input type="radio" name="clarity" value="Muy claro">
+
+                            Muy claro
+
+                        </label>
+
+                        <label class="flex items-center gap-3 text-gray-300">
+
+                            <input type="radio" name="clarity" value="Parcialmente claro">
+
+                            Lo entendí parcialmente
+
+                        </label>
+
+                        <label class="flex items-center gap-3 text-gray-300">
+
+                            <input type="radio" name="clarity" value="Necesito practicar más">
+
+                            Necesito practicar más
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+                <p id="validation-error"
+                    class="hidden mt-2 mb-6 px-4 py-3 rounded-xl border border-yellow-400 bg-yellow-400/10 text-yellow-200 text-sm font-medium tracking-[0.02em] animate-pulse shadow-[0_0_25px_rgba(250,204,21,0.35)]">
+
+                    Completa los 3 pasos antes de registrar el aprendizaje.
+
+                </p>
+
+                <!-- BOTONES -->
+
+                <div class="px-6 py-3 min-w-[170px]">
+
+                    <!-- BOTONES -->
+
+                    <div class="flex gap-4">
+
+                        <button onclick="hideValidation()"
+                            class="flex-1 py-4 bg-slate-700 text-white rounded-2xl hover:bg-slate-600 transition">
+
+                            Regresar
+
+                        </button>
+
+                        <button onclick="validate()"
+                            class="flex-1 py-4 bg-sky-600 text-white rounded-2xl hover:bg-sky-500 transition">
+
+                            Registrar aprendizaje
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tuned = [false, false, false];
+
+        let selectedAudience = "Usuario Técnico";
+
+        let selectedSignal = "Duda";
+
+        let selectedBlock = "Urgencia";
+
+        const audienceItems = [
+            "Usuario Técnico",
+            "Director",
+            "VP Comercial"
+        ];
+
+        const signalItems = [
+            "Duda",
+            "Escepticismo",
+            "Frustración"
+        ];
+
+        const blockItems = [
+            "Urgencia",
+            "Presupuesto",
+            "Competencia"
+        ];
+
+        const strategies = {
+
+            // ══ USUARIO TÉCNICO ═══════════════════════════════════════
+
+            "Usuario Técnico|Escepticismo|Urgencia": {
+                movement: "Complejidad → Claridad",
+                signal: [
+
+                    "Empieza a cuestionar más cosas mientras más explicas",
+
+                    "Hace pausas largas antes de responder",
+
+                    "Parece estar buscando dónde podría salir mal",
+
+                    "Necesita sentirse seguro antes de moverse rápido"
+                ],
+                risk: "Sobrecargar detalles",
+                objective: "Reducir fricción mental",
+                key: "Claridad antes de velocidad",
+                detected:
+                    `El perfil empezó a cuestionar más detalles porque todavía no percibe suficiente claridad para avanzar con seguridad. La conversación comenzó a sentirse más compleja de lo necesario.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde complejidad hacia claridad, ayudándole a visualizar una forma más simple y concreta de avanzar.`,
+
+                response:
+                    `“Podemos simplificar el escenario inicial para validar impacto rápidamente.”`,
+
+                why:
+                    `Cuando una conversación parece demasiado compleja, el cerebro retrasa la decisión. La claridad reduce fricción y hace que avanzar se sienta más seguro.`
+            },
+
+            "Usuario Técnico|Escepticismo|Presupuesto": {
+                movement: "Costo → Evidencia",
+                signal: [
+
+                    "Vuelve al costo incluso después de haberlo discutido",
+
+                    "Parece más cauteloso cada vez que hablas de inversión",
+
+                    "Te responde con más dudas que antes",
+
+                    "Sientes que todavía está tratando de reducir riesgo"
+                ],
+                risk: "Defender precio demasiado rápido",
+                objective: "Reducir percepción de exposición",
+                key: "Validar antes de escalar",
+                detected:
+                    `El perfil empezó a endurecer la conversación porque todavía no percibe suficiente certeza para justificar la inversión. Sigue tratando de reducir riesgo antes de comprometer recursos.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde costo hacia evidencia, ayudándole a visualizar resultados antes de aumentar el compromiso.`,
+
+                response:
+                    `“Podemos validar el impacto técnico primero antes de ampliar la inversión.”`,
+
+                why:
+                    `Cuando el riesgo parece más controlado, el cerebro deja de percibir la inversión como amenaza y recupera apertura.`
+            },
+
+            "Usuario Técnico|Escepticismo|Competencia": {
+                movement: "Comparación → Diferenciación",
+                signal: [
+
+                    "No deja de comparar lo que dices con otras opciones",
+
+                    "Parece estar buscando una diferencia realmente clara",
+
+                    "Cada explicación genera nuevas comparaciones",
+
+                    "Todavía no siente suficiente ventaja para cambiar"
+                ],
+                risk: "Competir desde argumentos genéricos",
+                objective: "Mostrar diferencia concreta",
+                key: "Diferenciar desde impacto",
+                detected:
+                    `El perfil sigue comparando constantemente porque todavía no percibe una diferencia suficientemente clara frente a otras alternativas. La conversación perdió dirección entre demasiadas comparaciones.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde comparación hacia diferenciación, ayudándole a visualizar impacto concreto y aplicable.`,
+
+                response:
+                    `“¿Le ayudaría visualizar dónde existe una diferencia más tangible frente a otras alternativas?”`,
+
+                why:
+                    `Cuando la diferencia se vuelve visible, el cerebro deja de comparar infinitamente y empieza a recuperar dirección.`
+            },
+
+            "Usuario Técnico|Duda|Urgencia": {
+                movement: "Complejidad → Simplicidad",
+                signal: [
+
+                    "Parece interesado, pero todavía no termina de aterrizar la idea",
+
+                    "Cada vez que avanzas, vuelve a preguntar cómo funcionaría realmente",
+
+                    "Necesita entenderlo bien antes de seguir avanzando",
+
+                    "Sientes que todavía está tratando de ordenar todo en su cabeza"
+                ],
+                risk: "Agregar más complejidad",
+                objective: "Reducir carga mental",
+                key: "Hacer simple avanzar",
+                detected:
+                    `El perfil todavía necesita más claridad antes de sentirse cómodo avanzando. La conversación no está bloqueada, pero todavía se siente demasiado abstracta o compleja.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde complejidad hacia simplicidad, ayudándole a visualizar una forma más clara y ligera de avanzar.`,
+
+                response:
+                    `“Podemos simplificar el primer paso para validar impacto sin afectar la operación.”`,
+
+                why:
+                    `Cuando una conversación parece demasiado compleja, el cerebro retrasa la decisión. La claridad reduce fricción y hace que avanzar se sienta más seguro.`
+            },
+
+            "Usuario Técnico|Duda|Presupuesto": {
+                movement: "Costo → Validación",
+                signal: [
+
+                    "El ambiente cambia apenas aparece el tema de inversión",
+
+                    "Parece estar calculando el riesgo antes de avanzar",
+
+                    "Quiere entender el impacto antes de comprometer recursos",
+
+                    "Sientes que todavía no está seguro de que valga la pena"
+                ],
+                risk: "Justificar inversión demasiado pronto",
+                objective: "Reducir percepción de riesgo",
+                key: "Validar antes de invertir",
+                detected:
+                    `El perfil todavía no siente suficiente seguridad para justificar inversión. Antes de avanzar, necesita reducir la sensación de riesgo.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde costo hacia validación, ayudándole a visualizar resultados antes de aumentar la exposición.`,
+
+                response:
+                    `“Podemos validar el impacto primero antes de escalar la inversión.”`,
+
+                why:
+                    `La resistencia normalmente no viene del precio. Viene del miedo a invertir antes de tener suficiente certeza.`
+            },
+
+            "Usuario Técnico|Duda|Competencia": {
+                movement: "Comparación → Diferenciación",
+                signal: [
+
+                    "Cada vez que avanzas, vuelve a mencionar otra alternativa",
+
+                    "Parece seguir comparando opciones internamente",
+
+                    "Necesita entender qué hace diferente esta propuesta",
+
+                    "Todavía siente que las opciones se parecen demasiado"
+                ],
+                risk: "Competir solo por características",
+                objective: "Mostrar valor diferencial",
+                key: "Diferenciar sin presión",
+                detected:
+                    `El perfil todavía no percibe una diferencia suficientemente clara frente a otras alternativas. La conversación sigue atrapada en comparación.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde comparación hacia diferenciación, ayudándole a visualizar una ventaja más concreta y relevante.`,
+
+                response:
+                    `“¿Le ayudaría visualizar dónde existe más impacto frente a otras alternativas?”`,
+
+                why:
+                    `Cuando todas las opciones parecen similares, el cerebro retrasa la decisión. La claridad en la diferencia recupera dirección.`
+            },
+
+            "Usuario Técnico|Frustración|Urgencia": {
+                movement: "Tensión → Simplicidad",
+                signal: [
+
+                    "Empieza a perder paciencia cuando la explicación se alarga",
+
+                    "Quiere avanzar más rápido de lo que la conversación permite",
+
+                    "Responde más corto que al inicio",
+
+                    "Sientes que ya no tiene espacio mental para más detalles"
+                ],
+                risk: "Agregar más presión o detalle",
+                objective: "Reducir carga operativa",
+                key: "Hacer fácil el siguiente paso",
+                detected:
+                    `El perfil ya no tiene suficiente espacio mental para procesar más complejidad. La conversación empezó a sentirse pesada y demasiado lenta para el nivel de presión actual.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde tensión hacia simplicidad, ayudándole a sentir que avanzar no aumentará su carga.`,
+
+                response:
+                    `“Podemos simplificar el primer paso para avanzar rápido sin afectar tu operación.”`,
+
+                why:
+                    `Cuando avanzar vuelve a sentirse ligero, el cerebro reduce resistencia y recupera apertura.`
+            },
+
+            "Usuario Técnico|Frustración|Presupuesto": {
+                movement: "Bloqueo → Validación mínima",
+                signal: [
+
+                    "El tono cambia cuando aparece el tema financiero",
+
+                    "Parece sentirse incómodo hablando de inversión",
+
+                    "Empieza a reducir el alcance de la conversación",
+
+                    "Sientes que quiere bajar el riesgo lo más posible"
+                ],
+                risk: "Insistir en el valor antes de escuchar",
+                objective: "Bajar la temperatura y reducir fricción",
+                key: "Escuchar antes de proponer",
+                detected:
+                    `El perfil ya tiene resistencia acumulada y el presupuesto terminó de frenar la conversación. En este punto, necesita bajar percepción de exposición antes de seguir avanzando.`,
+
+                intention:
+                    `Tu objetivo es bajar la temperatura primero y encontrar una entrada mínima que no active más resistencia.`,
+
+                response:
+                    `“¿Cuál sería el resultado más valioso que esperarías si el presupuesto no fuera un problema?”`,
+
+                why:
+                    `Cuando la persona siente que realmente la estás escuchando, la conversación recupera espacio y disminuye la tensión.`
+            },
+
+            "Usuario Técnico|Frustración|Competencia": {
+                movement: "Fatiga comparativa → Claridad simple",
+                signal: [
+
+                    "Ya no quiere seguir comparando tantas opciones",
+
+                    "Empieza a perder interés cuando aparecen más diferencias técnicas",
+
+                    "Busca algo más claro y directo",
+
+                    "Sientes que demasiada información ya lo saturó"
+                ],
+                risk: "Agregar más argumentos comparativos",
+                objective: "Reducir fatiga y dar una salida clara",
+                key: "Una diferencia, no diez",
+                detected:
+                    `El perfil ya evaluó demasiadas opciones y empezó a perder claridad en el proceso. La conversación se siente saturada y mentalmente agotadora.`,
+
+                intention:
+                    `Tu objetivo es reducir la complejidad comparativa a una sola diferencia relevante para su contexto.`,
+
+                response:
+                    `“Déjame mostrarte un solo punto donde la diferencia es más visible para lo que tú necesitas resolver.”`,
+
+                why:
+                    `Cuando la decisión parece más simple, el cerebro deja de sentirse saturado y recupera dirección.`
+            },
+
+            // ══ DIRECTOR ══════════════════════════════════════════════
+
+            "Director|Escepticismo|Urgencia": {
+                movement: "Presión → Claridad",
+                signal: [
+
+                    "Empieza a perder paciencia cuando la conversación se vuelve compleja",
+
+                    "Te lleva constantemente de regreso a lo importante",
+
+                    "Quiere respuestas más concretas y rápidas",
+
+                    "Parece estar buscando claridad antes de avanzar"
+                ],
+                risk: "Aumentar presión",
+                objective: "Reducir tensión",
+                key: "Claridad antes de velocidad",
+                detected:
+                    `El perfil empezó a endurecer la conversación porque todavía no percibe suficiente claridad para avanzar rápido. La presión ya empezó a competir contra la atención.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde presión hacia claridad, ayudándole a visualizar un camino más simple y controlado.`,
+
+                response:
+                    `“Podemos simplificar el escenario inicial para acelerar la validación.”`,
+
+                why:
+                    `Cuando el siguiente paso parece más claro, el cerebro deja de sentir presión innecesaria y recupera apertura.`
+            },
+            "Director|Escepticismo|Presupuesto": {
+                movement: "Costo → Validación",
+                signal: [
+
+                    "Hace pausas más largas cuando hablas de inversión",
+
+                    "Parece analizar el riesgo con más cuidado",
+
+                    "Necesita más certeza antes de comprometer recursos",
+
+                    "La conversación pierde velocidad al hablar de presupuesto"
+                ],
+                risk: "Defender valor demasiado pronto",
+                objective: "Reducir exposición",
+                key: "Validar antes de invertir",
+                detected:
+                    `El perfil todavía necesita más evidencia antes de sentir que la inversión tiene suficiente sentido.`,
+
+                intention:
+                    `Tu objetivo es reducir percepción de riesgo financiero antes de profundizar en precio.`,
+
+                response:
+                    `“¿Le ayudaría validar resultados primero antes de evaluar una inversión más amplia?”`,
+
+                why:
+                    `La validación reduce percepción de exposición financiera y hace que avanzar se sienta más seguro.`
+            },
+
+            "Director|Escepticismo|Competencia": {
+                movement: "Comparación → Impacto directo",
+                signal: [
+
+                    "No termina de ver una diferencia suficientemente fuerte",
+
+                    "Sigue comparando incluso después de explicar ventajas",
+
+                    "Parece necesitar una razón más clara para cambiar",
+
+                    "Todavía siente que las opciones se ven muy parecidas"
+                ],
+                risk: "Competir desde características genéricas",
+                objective: "Mostrar ventaja en su contexto específico",
+                key: "Su problema, no el mercado",
+                detected:
+                    `El perfil sigue comparando escenarios porque todavía no percibe suficiente evidencia para cambiar de dirección.`,
+
+                intention:
+                    `Tu objetivo es reducir incertidumbre y mover la conversación hacia validación concreta antes de defender valor.`,
+
+                response:
+                    `“¿Le ayudaría revisar un caso donde el impacto fue visible en una situación similar?”`,
+
+                why:
+                    `El escepticismo disminuye cuando el cerebro percibe evidencia tangible y no solamente argumentos comerciales.`
+            },
+
+            "Director|Duda|Urgencia": {
+                movement: "Complejidad → Simplicidad",
+                signal: [
+
+                    "Quiere entender rápido cómo afectaría la operación",
+
+                    "Evita profundizar demasiado en detalles",
+
+                    "Parece preocupado por el tiempo que esto podría tomar",
+
+                    "Sientes que necesita visualizar algo más simple"
+                ],
+                risk: "Aumentar carga operativa",
+                objective: "Reducir fricción",
+                key: "Hacer fácil avanzar",
+                detected:
+                    `El perfil todavía necesita visualizar una forma más simple de implementar el cambio. La conversación sigue sintiéndose más pesada de lo necesario.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde complejidad hacia simplicidad, ayudándole a sentir que avanzar será rápido y manejable.`,
+
+                response:
+                    `“Podemos simplificar el primer paso para reducir el impacto operativo.”`,
+
+                why:
+                    `Cuando avanzar parece más ligero, el cerebro reduce fricción y la conversación recupera movimiento.`
+            },
+
+            "Director|Duda|Presupuesto": {
+                movement: "Incertidumbre → Caso de negocio",
+                signal: [
+
+                    "El presupuesto empieza a frenar el ritmo de la conversación",
+
+                    "Quiere entender el impacto antes de comprometer recursos",
+
+                    "Evita avanzar demasiado rápido hacia una decisión",
+
+                    "Parece estar tratando de reducir exposición"
+                ],
+                risk: "Asumir que el presupuesto es el problema real",
+                objective: "Darle el argumento que necesita para defender la inversión",
+                key: "Él necesita justificarlo, no solo entenderlo",
+                detected:
+                    `El perfil todavía no logra visualizar suficiente impacto como para justificar inversión con seguridad.`,
+
+                intention:
+                    `Tu objetivo es reducir fricción financiera y mover la conversación desde costo hacia claridad de impacto.`,
+
+                response:
+                    `“¿Le ayudaría visualizar primero qué impacto tendría antes de hablar de inversión?”`,
+
+                why:
+                    `Cuando el valor todavía no es claro, el cerebro percibe el costo como riesgo. La claridad reduce resistencia.`
+            },
+
+            "Director|Duda|Competencia": {
+                movement: "Comparación → Claridad",
+                signal: [
+
+                    "Sigue comparando escenarios antes de decidir",
+
+                    "Parece buscar la opción más simple de ejecutar",
+
+                    "Necesita visualizar claramente por qué elegir esta opción",
+
+                    "Todavía siente demasiadas variables abiertas"
+                ],
+                risk: "Generar más incertidumbre",
+                objective: "Reducir confusión",
+                key: "Simplificar la decisión",
+                detected:
+                    `El perfil todavía no percibe una diferencia suficientemente clara frente a otras alternativas. La conversación sigue atrapada en comparación.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde comparación hacia diferenciación, ayudándole a visualizar una ventaja más concreta y relevante.`,
+
+                response:
+                    `“¿Le ayudaría visualizar dónde existe más impacto frente a otras alternativas?”`,
+
+                why:
+                    `Cuando todas las opciones parecen similares, el cerebro retrasa la decisión. La claridad en la diferencia recupera dirección.`
+            },
+
+            "Director|Frustración|Urgencia": {
+                movement: "Tensión → Simplicidad",
+                signal: [
+
+                    "Empieza a acelerar la conversación constantemente",
+
+                    "Pierde paciencia frente a demasiados detalles",
+
+                    "Quiere llegar rápido al siguiente paso",
+
+                    "Sientes que ya no tiene energía para procesar más complejidad"
+                ],
+                risk: "Agregar más presión",
+                objective: "Reducir carga mental",
+                key: "Simplificar la decisión",
+                detected:
+                    `El perfil ya no tiene suficiente espacio mental para procesar más complejidad. La conversación empezó a sentirse demasiado pesada para el ritmo que necesita.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde tensión hacia simplicidad, ayudándole a sentir que avanzar no aumentará su carga operativa.`,
+
+                response:
+                    `“Podemos simplificar el primer paso para acelerar resultados sin afectar la operación.”`,
+
+                why:
+                    `Cuando avanzar vuelve a sentirse ligero, el cerebro reduce tensión y recupera apertura.`
+            },
+
+            "Director|Frustración|Presupuesto": {
+                movement: "Resistencia → Escucha activa",
+                signal: [
+
+                    "La conversación se vuelve más tensa cuando aparece el costo",
+
+                    "Parece sentirse incómodo aumentando compromiso",
+
+                    "Empieza a simplificar todo lo posible",
+
+                    "Sientes que quiere reducir exposición rápidamente"
+                ],
+                risk: "Insistir en el valor o el retorno",
+                objective: "Crear espacio antes de proponer cualquier cosa",
+                key: "Escuchar es el movimiento estratégico",
+                detected:
+                    `La conversación empieza a sentirse pesada. El perfil parece cansado de evaluar impacto, costos y escenarios al mismo tiempo.`,
+
+                intention:
+                    `Tu objetivo es reducir carga mental y simplificar el siguiente paso.`,
+
+                response:
+                    `“¿Le ayudaría pensar solamente en un primer paso pequeño para validar impacto?”`,
+
+                why:
+                    `Cuando el cerebro siente demasiada presión simultánea, simplificar la decisión recupera apertura.`
+            },
+
+            "Director|Frustración|Competencia": {
+                movement: "Fatiga → Una diferencia relevante",
+                signal: [
+
+                    "Ya no quiere seguir evaluando tantas opciones",
+
+                    "Empieza a perder paciencia con comparaciones largas",
+
+                    "Busca una decisión más simple",
+
+                    "Sientes que demasiadas alternativas ya agotaron la conversación"
+                ],
+                risk: "Añadir más argumentos al ruido existente",
+                objective: "Reducir la fatiga y dar una salida simple",
+                key: "Menos opciones, más claridad",
+                detected:
+                    `El perfil ya muestra agotamiento frente a tantas alternativas y comparaciones. La conversación empieza a sentirse repetitiva.`,
+
+                intention:
+                    `Tu objetivo es simplificar la decisión y ayudarle a percibir rápidamente una diferencia verdaderamente importante.`,
+
+                response:
+                    `“¿Qué tendría que ser claramente diferente para que esta conversación valiera la pena para usted?”`,
+
+                why:
+                    `Cuando la conversación genera fatiga, el cerebro deja de evaluar detalles. Necesita una diferencia clara que recupere atención.`
+            },
+
+            // ══ VP COMERCIAL ══════════════════════════════════════════
+
+            "VP Comercial|Escepticismo|Urgencia": {
+                movement: "Validación crítica → Claridad estratégica",
+                signal: [
+
+                    "Empieza a perder interés cuando la conversación se vuelve larga",
+
+                    "Quiere algo más concreto y rápido",
+
+                    "Cuestiona impacto inmediato con más intensidad",
+
+                    "Parece buscar claridad antes de seguir invirtiendo atención"
+                ],
+                risk: "Defender valor bajo presión",
+                objective: "Dar certeza rápida sin perder profundidad",
+                key: "Certeza antes que velocidad",
+                detected:
+                    `El perfil necesita certeza, pero también siente presión de tiempo. La conversación empezó a volverse demasiado extensa para el nivel de urgencia actual.`,
+
+                intention:
+                    `Tu objetivo es darle certeza sobre el punto más importante sin intentar resolver todas las dudas al mismo tiempo.`,
+
+                response:
+                    `“El punto más crítico para validar rápidamente es este — los demás los podemos confirmar después.”`,
+
+                why:
+                    `Cuando la certeza aparece antes que la velocidad, el cerebro recupera dirección sin sentirse saturado.`
+            },
+
+            "VP Comercial|Escepticismo|Presupuesto": {
+                movement: "Costo → Retorno estratégico",
+                signal: [
+
+                    "El retorno empieza a importar más que la idea",
+
+                    "Necesita sentir más seguridad antes de invertir",
+
+                    "La conversación se vuelve más cautelosa cuando hablas de costo",
+
+                    "Sientes que todavía está protegiendo demasiado el riesgo"
+                ],
+                risk: "Hablar de precio antes de impacto",
+                objective: "Conectar inversión con resultado de negocio",
+                key: "Retorno antes que precio",
+                detected:
+                    `El perfil empezó a endurecer la conversación porque todavía evalúa si el impacto realmente justifica la inversión. El retorno todavía no es suficientemente visible.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde costo hacia retorno estratégico, ayudándole a visualizar impacto antes de aumentar exposición.`,
+
+                response:
+                    `“¿Le ayudaría visualizar dónde podría existir mayor retorno en los primeros 90 días?”`,
+
+                why:
+                    `Cuando el retorno se vuelve visible, el cerebro deja de percibir la inversión como amenaza y recupera apertura.`
+            },
+
+            "VP Comercial|Escepticismo|Competencia": {
+                movement: "Comparación → Diferenciación",
+                signal: [
+
+                    "Sigue comparando el impacto frente a otras alternativas",
+
+                    "No termina de percibir una ventaja suficientemente fuerte",
+
+                    "Parece buscar una diferencia realmente visible",
+
+                    "Todavía siente que cambiar implica demasiado riesgo"
+                ],
+                risk: "Intentar convencer demasiado rápido",
+                objective: "Mostrar ventaja clara",
+                key: "Diferenciar con claridad",
+                detected:
+                    `El perfil todavía no percibe una ventaja suficientemente clara frente a otras alternativas. La conversación sigue atrapada en comparación constante.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde comparación hacia diferenciación, ayudándole a visualizar una ventaja concreta y relevante para el negocio.`,
+
+                response:
+                    `“¿Le ayudaría visualizar dónde podría existir una ventaja más inmediata frente a otras opciones?”`,
+
+                why:
+                    `Cuando la diferenciación se vuelve evidente, el cerebro deja de comparar indefinidamente y recupera dirección.`
+            },
+
+            "VP Comercial|Duda|Urgencia": {
+                movement: "Exploración → Acción",
+                signal: [
+
+                    "Parece interesado, pero todavía no convierte eso en acción",
+
+                    "Habla de oportunidades, pero evita aterrizar próximos pasos",
+
+                    "Quiere avanzar rápido sin sentir demasiado riesgo",
+
+                    "Sientes que necesita un camino más simple para empezar"
+                ],
+                risk: "Perder momentum",
+                objective: "Convertir interés en movimiento",
+                key: "Reducir fricción inicial",
+                detected:
+                    `El perfil mantiene interés, pero todavía no percibe suficiente claridad para avanzar rápido. La conversación sigue en exploración sin convertirse en movimiento.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde exploración hacia acción, ayudándole a visualizar un siguiente paso pequeño y fácil de ejecutar.`,
+
+                response:
+                    `“Podemos comenzar con algo simple para validar impacto rápidamente.”`,
+
+                why:
+                    `Cuando avanzar parece ligero, el cerebro reduce fricción y la conversación empieza a recuperar velocidad.`
+            },
+
+            "VP Comercial|Duda|Presupuesto": {
+                movement: "Costo → Oportunidad",
+                signal: [
+
+                    "Empieza a evaluar si el retorno realmente justifica la inversión",
+
+                    "El entusiasmo baja cuando aparece el tema financiero",
+
+                    "Necesita visualizar más impacto antes de avanzar",
+
+                    "Sientes que todavía no ve suficiente oportunidad"
+                ],
+                risk: "Hablar demasiado de inversión",
+                objective: "Reforzar impacto potencial",
+                key: "Visualizar retorno",
+                detected:
+                    `El perfil todavía sigue evaluando si el impacto potencial justifica la inversión. El valor todavía no es suficientemente tangible para avanzar con seguridad.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde inversión hacia oportunidad, ayudándole a visualizar impacto antes de evaluar exposición.`,
+
+                response:
+                    `“¿Le ayudaría visualizar dónde podría existir mayor retorno inicial?”`,
+
+                why:
+                    `Cuando el potencial se vuelve más visible, el cerebro deja de enfocarse solamente en el costo y recupera apertura.`
+            },
+
+            "VP Comercial|Duda|Competencia": {
+                movement: "Exploración comparativa → Ventaja específica",
+                signal: [
+
+                    "Sigue comparando ventajas entre distintas opciones",
+
+                    "Necesita visualizar una diferencia más clara",
+
+                    "Parece buscar qué opción generaría más impacto",
+
+                    "Todavía siente que la ventaja no es suficientemente visible"
+                ],
+                risk: "Generar más opciones en lugar de más claridad",
+                objective: "Reducir la comparación a un criterio relevante",
+                key: "Un criterio claro gana sobre diez argumentos",
+                detected:
+                    `El perfil sigue explorando alternativas porque todavía no tiene un criterio suficientemente claro para decidir. La conversación se mantiene abierta, pero sin dirección.`,
+
+                intention:
+                    `Tu objetivo es reducir la conversación a un solo criterio de decisión relevante para su negocio específico.`,
+
+                response:
+                    `“¿Cuál es el resultado más crítico que necesitas garantizar en los próximos 90 días? Evaluemos desde ahí.”`,
+
+                why:
+                    `Cuando existe un criterio claro, el cerebro deja de comparar infinitamente y recupera dirección.`
+            },
+
+            "VP Comercial|Frustración|Urgencia": {
+                movement: "Tensión → Alivio operativo",
+                signal: [
+
+                    "Empieza a perder paciencia cuando la conversación no avanza",
+
+                    "Quiere algo más directo y rápido",
+
+                    "Reduce interés frente a demasiados detalles",
+
+                    "Sientes que necesita recuperar momentum"
+                ],
+                risk: "Añadir más urgencia a la urgencia existente",
+                objective: "Reducir la carga y dar una salida rápida",
+                key: "Aliviar antes de avanzar",
+                detected:
+                    `El perfil ya opera bajo demasiada presión y la conversación empezó a sentirse como una carga más. La tensión ya está afectando la apertura.`,
+
+                intention:
+                    `Tu objetivo es reducir la carga percibida y darle una salida que se sienta rápida y manejable.`,
+
+                response:
+                    `“Entiendo que el tiempo es crítico ahora. ¿Cuál sería el resultado más importante que necesitas en los próximos 30 días?”`,
+
+                why:
+                    `Cuando la conversación alivia en lugar de presionar, el cerebro reduce tensión y recupera apertura.`
+            },
+
+            "VP Comercial|Frustración|Presupuesto": {
+                movement: "Bloqueo emocional → Espacio de escucha",
+                signal: [
+
+                    "El entusiasmo disminuye apenas aparece la inversión",
+
+                    "Parece querer bajar el riesgo rápidamente",
+
+                    "Empieza a reducir apertura frente a la conversación",
+
+                    "Sientes que ya no quiere aumentar exposición"
+                ],
+                risk: "Intentar resolver el presupuesto con argumentos",
+                objective: "Bajar la temperatura antes de cualquier propuesta",
+                key: "El siguiente paso es escuchar, no proponer",
+                detected:
+                    `El perfil ya tiene frustración acumulada y el presupuesto terminó de cerrar la conversación. La resistencia ya es más emocional que racional.`,
+
+                intention:
+                    `Tu objetivo es bajar la temperatura creando un espacio de escucha genuina antes de reintroducir cualquier propuesta.`,
+
+                response:
+                    `“Tiene sentido que estés en ese punto. ¿Qué tendría que cambiar para que esto pudiera ser una conversación diferente?”`,
+
+                why:
+                    `Cuando la persona siente que realmente la estás escuchando, el cerebro baja defensa y la conversación recupera espacio.`
+            },
+
+            "VP Comercial|Frustración|Competencia": {
+                movement: "Comparación → Diferenciación",
+                signal: [
+
+                    "Ya no quiere seguir comparando tantas alternativas",
+
+                    "Necesita una ventaja clara y rápida de entender",
+
+                    "Pierde paciencia frente a demasiadas opciones",
+
+                    "Sientes que la conversación ya lo agotó mentalmente"
+                ],
+                risk: "Aumentar presión comercial",
+                objective: "Reducir fatiga comparativa",
+                key: "Claridad competitiva",
+                detected:
+                    `El perfil ya no tiene espacio mental para seguir comparando tantas alternativas. La conversación empezó a sentirse repetitiva y agotadora.`,
+
+                intention:
+                    `Tu objetivo es mover la conversación desde comparación hacia ventaja, ayudándole a visualizar una diferencia clara y fácil de entender.`,
+
+                response:
+                    `“Podemos revisar rápidamente dónde existe una ventaja más visible frente a otras opciones.”`,
+
+                why:
+                    `Cuando la ventaja se vuelve evidente, el cerebro deja de sentirse saturado y recupera dirección.`
+            },
+        };
+
+        function renderList(containerId, items, activeIndex) {
+
+            const container =
+                document.getElementById(containerId);
+
+            container.innerHTML = "";
+
+            const start =
+                Math.max(0, activeIndex - 1);
+
+            const end =
+                Math.min(items.length, activeIndex + 2);
+
+            for (let i = start; i < end; i++) {
+
+                const div =
+                    document.createElement("div");
+
+                div.className = "signal-item";
+
+                if (i === activeIndex) {
+                    div.classList.add("active-signal");
+                }
+
+                div.innerText = items[i];
+
+                container.appendChild(div);
+            }
+        }
+
+        renderList(
+            "audience-list",
+            audienceItems,
+            3
+        );
+
+        renderList(
+            "signal-list",
+            signalItems,
+            3
+        );
+
+        renderList(
+            "block-list",
+            blockItems,
+            2
+        );
+
+        function updateSummary() {
+
+            document.getElementById(
+                "summary-text"
+            ).innerHTML = `
+
+        Parece que estás calibrando una conversación
+        con un perfil
+        <strong>${selectedAudience}</strong>.
+
+        La señal más fuerte en este momento parece ser
+        <strong>${selectedSignal}</strong>,
+        y el principal bloqueo identificado
+        viene de
+        <strong>${selectedBlock}</strong>.
+
+    `;
+        }
+
+        renderList(
+            "audience-list",
+            audienceItems,
+            -1
+        );
+
+        renderList(
+            "signal-list",
+            signalItems,
+            -1
+        );
+
+        renderList(
+            "block-list",
+            blockItems,
+            -1
+        );
+
+        let activeSlider = null;
+
+        document.querySelectorAll('.fader-track')
+            .forEach(track => {
+
+                const thumb =
+                    track.querySelector('.fader-thumb');
+
+                const index =
+                    track.dataset.index;
+
+                thumb.addEventListener(
+                    'mousedown',
+                    () => {
+
+                        activeSlider = {
+                            track,
+                            thumb,
+                            index
+                        };
+                    });
+            });
+
+        document.addEventListener(
+            'mousemove',
+            (e) => {
+
+                if (!activeSlider) return;
+
+                const {
+                    track,
+                    thumb,
+                    index
+                } = activeSlider;
+
+                const rect =
+                    track.getBoundingClientRect();
+
+                let y =
+                    e.clientY - rect.top - 9;
+
+                y = Math.max(0, Math.min(y, 290));
+
+                thumb.style.top = y + 'px';
+
+                let activeIndex = Math.round(y / 48);
+
+                if (index == 0) {
+
+                    activeIndex =
+                        Math.max(
+                            0,
+                            Math.min(
+                                activeIndex,
+                                audienceItems.length - 1
+                            )
+                        );
+
+                    renderList(
+                        "audience-list",
+                        audienceItems,
+                        activeIndex
+                    );
+
+                    selectedAudience =
+                        audienceItems[activeIndex];
+
+                    updateSummary();
+
+                }
+
+                if (index == 1) {
+
+                    activeIndex =
+                        Math.max(
+                            0,
+                            Math.min(
+                                activeIndex,
+                                signalItems.length - 1
+                            )
+                        );
+
+                    renderList(
+                        "signal-list",
+                        signalItems,
+                        activeIndex
+                    );
+
+                    selectedSignal =
+                        signalItems[activeIndex];
+
+                    updateSummary();
+                }
+
+                if (index == 2) {
+
+                    activeIndex =
+                        Math.max(
+                            0,
+                            Math.min(
+                                activeIndex,
+                                blockItems.length - 1
+                            )
+                        );
+
+                    renderList(
+                        "block-list",
+                        blockItems,
+                        activeIndex
+                    );
+
+                    selectedBlock =
+                        blockItems[activeIndex];
+
+                    updateSummary();
+                }
+
+                updateConnectionLine();
+
+                tuned[index] = true;
+            });
+
+        document.addEventListener(
+            'mouseup',
+            () => {
+
+                activeSlider = null;
+
+                if (tuned.every(v => v)) {
+
+                    document
+                        .getElementById('analyze-btn')
+                        .classList.remove('hidden');
+                }
+            });
+
+        function updateStrategy() {
+
+            const key =
+                `${selectedAudience}|${selectedSignal}|${selectedBlock}`;
+
+            const strategy =
+                strategies[key];
+
+            if (!strategy) return;
+
+            document
+                .getElementById(
+                    'detected-text'
+                ).innerText =
+                strategy.detected;
+
+            document
+                .getElementById(
+                    'intention-text'
+                ).innerText =
+                strategy.intention;
+
+            document
+                .getElementById(
+                    'response-text'
+                ).innerText =
+                strategy.response;
+
+            document
+                .getElementById(
+                    'why-text'
+                ).innerText =
+                strategy.why;
+
+            document
+                .getElementById(
+                    'fw-movement'
+                ).innerText =
+                strategy.movement;
+
+            document
+                .getElementById(
+                    'fw-audience'
+                ).innerText =
+                selectedAudience;
+
+            document
+                .getElementById(
+                    'fw-signal'
+                ).innerText =
+                selectedSignal;
+
+            document
+                .getElementById(
+                    'fw-block'
+                ).innerText =
+                selectedBlock;
+
+            const signalList =
+                document.getElementById(
+                    'fw-signal-list'
+                );
+
+            signalList.innerHTML = "";
+
+            strategy.signal.forEach(item => {
+
+                const li =
+                    document.createElement("li");
+
+                li.innerText = item;
+
+                signalList.appendChild(li);
+            });
+
+        }
+
+        function startAnalysis() {
+
+    updateStrategy();
+
+    document
+        .getElementById('screen1')
+        .classList.remove('active');
+
+    document
+        .getElementById('screen3')
+        .classList.add('active');
+
+}
+
+        function showValidation() {
+
+            document
+                .getElementById(
+                    'validationModal'
+                )
+                .classList.remove('hidden');
+        }
+
+        function hideValidation() {
+
+            document
+                .getElementById(
+                    'validationModal'
+                )
+                .classList.add('hidden');
+        }
+
+        function validate() {
+
+            const reflection =
+                document
+                    .getElementById(
+                        'reflectionInput'
+                    )
+                    .value
+                    .trim();
+
+            const transfer =
+                document
+                    .getElementById(
+                        'transferInput'
+                    )
+                    .value
+                    .trim();
+
+            const clarity =
+                document.querySelector(
+                    'input[name="clarity"]:checked'
+                );
+
+            if (
+                !reflection ||
+                !transfer ||
+                !clarity
+            ) {
+
+                document
+                    .getElementById("validation-error")
+                    .classList.remove("hidden");
+
+                return;
+            }
+
+            document
+                .getElementById("validation-error")
+                .classList.add("hidden");
+
+            document
+                .getElementById("validationModal")
+                .classList.add("opacity-0");
+
+            setTimeout(() => {
+
+                window.location.reload();
+
+            }, 180);
+
+        }
+
+        function resetExperience() {
+
+            tuned = [false, false, false];
+
+            currentIndexes = [0, 0, 0];
+
+            selectedAudience = "Director";
+            selectedSignal = "Escepticismo";
+            selectedBlock = "Competencia";
+
+            document
+                .getElementById("reflectionInput")
+                .value = "";
+
+            document
+                .getElementById("transferInput")
+                .value = "";
+
+            document
+                .querySelectorAll(
+                    'input[name="clarity"]'
+                )
+                .forEach(radio => {
+
+                    radio.checked = false;
+
+                });
+
+            updateUI();
+
+        }
+        function updateConnectionLine() {
+
+            const thumbs = [
+
+                document.getElementById("thumb0"),
+                document.getElementById("thumb1"),
+                document.getElementById("thumb2")
+
+            ];
+
+            const container =
+                document
+                    .getElementById("connection-svg")
+                    .getBoundingClientRect();
+
+            const points = thumbs.map(thumb => {
+
+                const rect =
+                    thumb.getBoundingClientRect();
+
+                return {
+
+                    x:
+                        rect.left +
+                        rect.width / 2 -
+                        container.left,
+
+                    y:
+                        rect.top +
+                        rect.height / 2 -
+                        container.top
+
+                };
+
+            });
+
+            const path = `
+
+    M ${points[0].x} ${points[0].y}
+
+    C
+    ${points[0].x + 140} ${points[0].y - 45},
+
+    ${points[1].x - 140} ${points[1].y + 45},
+
+    ${points[1].x} ${points[1].y}
+
+    S
+    ${points[2].x - 140} ${points[2].y - 45},
+
+    ${points[2].x} ${points[2].y}
+
+`;
+
+            document
+                .getElementById("connection-path")
+                .setAttribute("d", path);
+
+        }
+
+        updateConnectionLine();
+
+    </script>
+</body>
+
+</html>
